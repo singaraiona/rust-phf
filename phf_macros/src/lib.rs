@@ -123,6 +123,10 @@ impl ParsedKey {
                 }
             }
             Expr::Group(group) => ParsedKey::from_expr(&group.expr),
+            Expr::Verbatim(ts) => {
+                println!("TS: {:?}", ts);
+                None
+            }
             x => None,
         }
     }
