@@ -125,7 +125,7 @@ impl ParsedKey {
             }
             Expr::Group(group) => ParsedKey::from_expr(&group.expr),
             Expr::Type(c) => Some(ParsedKey::U32(124)),
-            Expr::Path(c) => Some(ParsedKey::U32(124)),
+            // Expr::Path(c) => Some(ParsedKey::U32(124)),
             _ => None,
         }
     }
