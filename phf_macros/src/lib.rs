@@ -55,37 +55,42 @@ impl PhfHash for ParsedKey {
 impl ParsedKey {
     fn from_expr(expr: &Expr) -> Option<ParsedKey> {
         match expr {
-            Expr::Lit(lit) => match &lit.lit {
-                Lit::Str(s) => Some(ParsedKey::Str(s.value())),
-                Lit::ByteStr(s) => Some(ParsedKey::Binary(s.value())),
-                Lit::Byte(s) => Some(ParsedKey::U8(s.value())),
-                Lit::Char(s) => Some(ParsedKey::Char(s.value())),
-                Lit::Int(s) => {
-                    println!("PARSED: {}", s);
-                    match s.suffix() {
-                        // we've lost the sign at this point, so `-128i8` looks like `128i8`,
-                        // which doesn't fit in an `i8`; parse it as a `u8` and cast (to `0i8`),
-                        // which is handled below, by `Unary`
-                        "i8" => Some(ParsedKey::I8(s.base10_parse::<u8>().unwrap() as i8)),
-                        "i16" => Some(ParsedKey::I16(s.base10_parse::<u16>().unwrap() as i16)),
-                        "i32" => Some(ParsedKey::I32(s.base10_parse::<u32>().unwrap() as i32)),
-                        "i64" => Some(ParsedKey::I64(s.base10_parse::<u64>().unwrap() as i64)),
-                        "i128" => Some(ParsedKey::I128(s.base10_parse::<u128>().unwrap() as i128)),
-                        "u8" => Some(ParsedKey::U8(s.base10_parse::<u8>().unwrap())),
-                        "u16" => Some(ParsedKey::U16(s.base10_parse::<u16>().unwrap())),
-                        "u32" => Some(ParsedKey::U32(s.base10_parse::<u32>().unwrap())),
-                        "u64" => Some(ParsedKey::U64(s.base10_parse::<u64>().unwrap())),
-                        "u128" => Some(ParsedKey::U128(s.base10_parse::<u128>().unwrap())),
-                        _ => None,
+            Expr::Lit(lit) => {
+                println!("lit");
+                match &lit.lit {
+                    Lit::Str(s) => Some(ParsedKey::Str(s.value())),
+                    Lit::ByteStr(s) => Some(ParsedKey::Binary(s.value())),
+                    Lit::Byte(s) => Some(ParsedKey::U8(s.value())),
+                    Lit::Char(s) => Some(ParsedKey::Char(s.value())),
+                    Lit::Int(s) => {
+                        println!("PARSED: {}", s);
+                        match s.suffix() {
+                            // we've lost the sign at this point, so `-128i8` looks like `128i8`,
+                            // which doesn't fit in an `i8`; parse it as a `u8` and cast (to `0i8`),
+                            // which is handled below, by `Unary`
+                            "i8" => Some(ParsedKey::I8(s.base10_parse::<u8>().unwrap() as i8)),
+                            "i16" => Some(ParsedKey::I16(s.base10_parse::<u16>().unwrap() as i16)),
+                            "i32" => Some(ParsedKey::I32(s.base10_parse::<u32>().unwrap() as i32)),
+                            "i64" => Some(ParsedKey::I64(s.base10_parse::<u64>().unwrap() as i64)),
+                            "i128" => {
+                                Some(ParsedKey::I128(s.base10_parse::<u128>().unwrap() as i128))
+                            }
+                            "u8" => Some(ParsedKey::U8(s.base10_parse::<u8>().unwrap())),
+                            "u16" => Some(ParsedKey::U16(s.base10_parse::<u16>().unwrap())),
+                            "u32" => Some(ParsedKey::U32(s.base10_parse::<u32>().unwrap())),
+                            "u64" => Some(ParsedKey::U64(s.base10_parse::<u64>().unwrap())),
+                            "u128" => Some(ParsedKey::U128(s.base10_parse::<u128>().unwrap())),
+                            _ => None,
+                        }
                     }
+                    Lit::Bool(s) => Some(ParsedKey::Bool(s.value)),
+                    Lit::Verbatim(t) => {
+                        println!("{:?}", t);
+                        None
+                    }
+                    _ => None,
                 }
-                Lit::Bool(s) => Some(ParsedKey::Bool(s.value)),
-                Lit::Verbatim(t) => {
-                    println!("{:?}", t);
-                    None
-                }
-                _ => None,
-            },
+            }
             Expr::Array(array) => {
                 let mut buf = vec![];
                 for expr in &array.elems {
@@ -148,7 +153,6 @@ impl Parse for Key {
         match item {
             Item::Const(c) => {
                 if let Some(parsed) = ParsedKey::from_expr(&c.expr) {
-                    // println!("{}", *c.expr);
                     return Ok(Key {
                         parsed,
                         expr: *c.expr,
