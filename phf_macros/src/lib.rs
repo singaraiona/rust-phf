@@ -144,18 +144,18 @@ impl PhfHash for Key {
 
 impl Parse for Key {
     fn parse(input: ParseStream) -> parse::Result<Key> {
-        let item: Item = input.parse()?;
-        match item {
-            Item::Const(c) => {
-                if let Some(parsed) = ParsedKey::from_expr(&c.expr) {
-                    return Ok(Key {
-                        parsed,
-                        expr: *c.expr,
-                    });
-                }
-            }
-            _ => (),
-        }
+        // let item: Item = input.parse()?;
+        // match item {
+        //     Item::Const(c) => {
+        //         if let Some(parsed) = ParsedKey::from_expr(&c.expr) {
+        //             return Ok(Key {
+        //                 parsed,
+        //                 expr: *c.expr,
+        //             });
+        //         }
+        //     }
+        //     _ => (),
+        // }
 
         let expr: Expr = input.parse()?;
         if let Some(parsed) = ParsedKey::from_expr(&expr) {
