@@ -120,10 +120,7 @@ impl ParsedKey {
                 }
             }
             Expr::Group(group) => ParsedKey::from_expr(&group.expr),
-            Expr::C
-            x => {
-                None
-            }
+            x => None,
         }
     }
 }
