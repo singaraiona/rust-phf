@@ -8,7 +8,7 @@ use std::collections::HashSet;
 use std::hash::Hasher;
 use syn::parse::{self, Parse, ParseStream};
 use syn::punctuated::Punctuated;
-use syn::{parse_macro_input, Error, Expr, Lit, Token, UnOp};
+use syn::{parse_macro_input, Error, Expr, Lit, Token, UnOp, Item};
 
 #[derive(Hash, PartialEq, Eq, Clone)]
 enum ParsedKey {
@@ -53,6 +53,11 @@ impl PhfHash for ParsedKey {
 }
 
 impl ParsedKey {
+    fn from_item(item: &Item) -> Option<ParsedKey> {
+        match item {
+            Const(ItemConst) => Some(ParsedKey::U32(123)),
+        }
+    }
     fn from_expr(expr: &Expr) -> Option<ParsedKey> {
         match expr {
             Expr::Lit(lit) => match &lit.lit {
@@ -120,10 +125,6 @@ impl ParsedKey {
                 }
             }
             Expr::Group(group) => ParsedKey::from_expr(&group.expr),
-            Expr::Verbatim(ts) => {
-                println!("TS: {:?}", ts);
-                Some(ParsedKey::I32(123))
-            }
             x => None,
         }
     }
@@ -146,8 +147,9 @@ impl PhfHash for Key {
 impl Parse for Key {
     fn parse(input: ParseStream) -> parse::Result<Key> {
         let expr = input.parse()?;
-        let parsed = ParsedKey::from_expr(&expr)
-            .ok_or_else(|| Error::new_spanned(&expr, "unsupported key expression"))?;
+        let parsed = ParsedKey::from_item(&expr)
+            .ok_or_else(|| ParsedKey::from_expr(&expr))
+            .ok_or_else(|| Error::new_spanned(&expr, "unsupported key expression")))?;
 
         Ok(Key { parsed, expr })
     }
