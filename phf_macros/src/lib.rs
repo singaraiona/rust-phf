@@ -8,7 +8,7 @@ use std::collections::HashSet;
 use std::hash::Hasher;
 use syn::parse::{self, Parse, ParseStream};
 use syn::punctuated::Punctuated;
-use syn::{parse_macro_input, Error, Expr, Lit, Token, UnOp, Item};
+use syn::{parse_macro_input, Error, Expr, Item, Lit, Token, UnOp};
 
 #[derive(Hash, PartialEq, Eq, Clone)]
 enum ParsedKey {
@@ -149,7 +149,7 @@ impl Parse for Key {
         let expr = input.parse()?;
         let parsed = ParsedKey::from_item(&expr)
             .ok_or_else(|| ParsedKey::from_expr(&expr))
-            .ok_or_else(|| Error::new_spanned(&expr, "unsupported key expression")))?;
+            .ok_or_else(|| Error::new_spanned(&expr, "unsupported key expression"))?;
 
         Ok(Key { parsed, expr })
     }
