@@ -77,6 +77,10 @@ impl ParsedKey {
                     _ => None,
                 },
                 Lit::Bool(s) => Some(ParsedKey::Bool(s.value)),
+                Lit::Verbatim(t) => {
+                    println!("{:?}", t);
+                    None
+                }
                 _ => None,
             },
             Expr::Array(array) => {
@@ -116,6 +120,7 @@ impl ParsedKey {
                 }
             }
             Expr::Group(group) => ParsedKey::from_expr(&group.expr),
+            Expr::C
             x => {
                 println!("XXXXX {}", x);
                 None
