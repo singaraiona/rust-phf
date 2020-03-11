@@ -122,7 +122,7 @@ impl ParsedKey {
             Expr::Group(group) => ParsedKey::from_expr(&group.expr),
             Expr::Verbatim(ts) => {
                 println!("TS: {:?}", ts);
-                None
+                Some(ParsedKey::I32(123))
             }
             x => None,
         }
