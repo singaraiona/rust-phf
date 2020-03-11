@@ -124,7 +124,7 @@ impl ParsedKey {
                 }
             }
             Expr::Group(group) => ParsedKey::from_expr(&group.expr),
-            _ => None,
+            _ => Some(ParsedKey::U32(124)),
         }
     }
 }
