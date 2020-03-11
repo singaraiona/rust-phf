@@ -53,11 +53,6 @@ impl PhfHash for ParsedKey {
 }
 
 impl ParsedKey {
-    fn from_item(item: &Item) -> Option<ParsedKey> {
-        match item {
-            Const(ItemConst) => Some(ParsedKey::U32(123)),
-        }
-    }
     fn from_expr(expr: &Expr) -> Option<ParsedKey> {
         match expr {
             Expr::Lit(lit) => match &lit.lit {
@@ -146,12 +141,25 @@ impl PhfHash for Key {
 
 impl Parse for Key {
     fn parse(input: ParseStream) -> parse::Result<Key> {
-        let expr = input.parse()?;
-        let parsed = ParsedKey::from_item(&expr)
-            .ok_or_else(|| ParsedKey::from_expr(&expr))
-            .ok_or_else(|| Error::new_spanned(&expr, "unsupported key expression"))?;
+        let item: Item = input.parse()?;
+        match item {
+            Item::Const(c) => {
+                if let Some(parsed) = ParsedKey::from_expr(&c.expr) {
+                    return Ok(Key {
+                        parsed,
+                        expr: *c.expr,
+                    });
+                }
+            }
+            _ => (),
+        }
 
-        Ok(Key { parsed, expr })
+        let expr: Expr = input.parse()?;
+        if let Some(parsed) = ParsedKey::from_expr(&expr) {
+            return Ok(Key { parsed, expr });
+        }
+
+        Err(Error::new_spanned(&expr, "unsupported key expression"))
     }
 }
 
