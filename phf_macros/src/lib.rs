@@ -81,10 +81,7 @@ impl ParsedKey {
                     println!("{:?}", t);
                     None
                 }
-                x => {
-                    println!("X: {:?}", x);
-                    None
-                }
+                _ => None,
             },
             Expr::Array(array) => {
                 let mut buf = vec![];
